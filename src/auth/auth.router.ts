@@ -1,7 +1,7 @@
 import * as express from 'express';
 import * as authController from './auth.controller';
 
-class AuthRouter {
+export class AuthRouter {
 
     public router;
 
@@ -12,12 +12,13 @@ class AuthRouter {
             .post(authController.authenticate);
 
         this.router
-            .route('/token')
+            .route('/authenticate/token')
             .post(authController.refreshToken)
             .delete(authController.revokeToken);
+
+        this.router
+            .route('/authenticate/forgot')
+            .post(authController.passwordForgot);
     }
 }
-
-
-export const authRouter = new AuthRouter().router;
 

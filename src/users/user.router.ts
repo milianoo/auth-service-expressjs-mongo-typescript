@@ -1,24 +1,53 @@
 import * as express from 'express';
-import * as userController from './user.controller';
+import * as controller from './user.controller';
+import {isAuthenticated, authorize} from '../auth/auth.controller';
+import {Access} from './user.access';
 
-class UserRouter {
+export class UserRouter {
 
     public router;
 
     constructor() {
         this.router = express.Router();
+
+        this.router
+            .route('/users/exist/:username')
+            .get(controller.isUsernameAvailable);
+        
+        this.router
+            .route('/users/activate')
+            .get(isAuthenticated, controller.resendEmail)
+            .post(isAuthenticated, controller.activateUser);
+
         this.router
             .route('/users')
-            .post(userController.postUser)
-            .get(userController.getUsers);
+            .post(controller.createUser)
+            .get(
+                isAuthenticated,
+                authorize([
+                    Access.View_Management_Users,
+                    Access.Edit_Management_Users
+                ]),
+                controller.getUsers
+            );
 
         this.router
             .route('/users/:id')
-            .get(userController.getUser)
-            .put(userController.putUser)
-            .delete(userController.deleteUser);
+            .get(
+                isAuthenticated,
+                controller.getUser
+            )
+            .put(
+                isAuthenticated,
+                controller.updateUser
+            )
+            .delete(
+                isAuthenticated,
+                authorize([
+                    Access.View_Management_Users,
+                    Access.Edit_Management_Users
+                ]),
+                controller.deleteUser
+            );
     }
 }
-
-
-export const usersRouter = new UserRouter().router;

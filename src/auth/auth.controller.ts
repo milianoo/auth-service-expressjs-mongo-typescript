@@ -3,12 +3,20 @@ import * as passport from 'passport';
 import * as randToken from 'rand-token';
 import config from "../bin/config";
 import {User} from "../users/user.model";
+import {Roles} from '../users/roles/roles.config';
+import {Access} from '../users/user.access';
+import {sendResetPasswordEmail} from './forgot-password.notifier';
 
 let activeTokens = [];
 
 let getAuthTokenJsonResponse = function (user) {
 
-    let token = jwt.sign(user.toJSON(), config.secret, {
+    user = user.toObject();
+    delete user.password;
+
+    console.log(user);
+
+    let token = jwt.sign(user, config.secret, {
         expiresIn: '1 day'
     });
     let refreshToken = randToken.uid(256);
@@ -18,22 +26,18 @@ let getAuthTokenJsonResponse = function (user) {
 
 export const authenticate = function(req, res) {
 
-    let name = req.body.username;
-    if (!name) {
+    let email = req.body.username;
+    if (!email) {
         res.status(400)
             .send({ reason: 'BadRequest', message: 'field "name" is required.' });
         return;
     }
 
-    User.findOne({
-        name: name
-    }, function(err, user) {
-        if (err) throw err;
+    User.findOne({ email: email })
+        .select('+password')
+        .then((user) => {
 
-        if (!user) {
-            res.status(404)
-                .send({ reason: 'NotFound', message: 'requested "username" not found.' });
-        } else {
+            console.log(user.email);
 
             User.comparePassword(req.body.password, user.password, function(err, isMatch) {
                 if (isMatch && !err) {
@@ -45,8 +49,11 @@ export const authenticate = function(req, res) {
                         .send({ reason: 'Unauthorized', message: 'user is not authorized.' });
                 }
             });
-        }
-    });
+
+        }).catch(() => {
+            res.status(401)
+                .send({ reason: 'Unauthorized', message: 'requested "username" not found.' });
+        });
 };
 
 export const refreshToken = function (req, res) {
@@ -75,7 +82,7 @@ export const refreshToken = function (req, res) {
     }
 };
 
-export const revokeToken = function (req, res) {
+export const revokeToken = (req, res) => {
 
     let refreshToken = req.body.refreshToken;
     let userId = req.body.id;
@@ -86,6 +93,33 @@ export const revokeToken = function (req, res) {
     }else{
         res.send(304);
     }
+};
+
+export const passwordForgot = (req, res) => {
+
+    if (req.body.email) {
+        // sendResetPasswordEmail()
+    }
+};
+
+export const authorize = (permissions: Array<Access>) => {
+
+    return function(req, res, next) {
+
+        let role = Roles[req.user.role];
+        if (role) {
+            permissions.forEach(access => {
+                if (!role.has(access)) {
+                    res.status(403).send({ reason: 'Unauthorized', message: 'action is not authorized.' });
+                }
+            });
+
+            next();
+        }else {
+            res.status(403).send({ reason: 'Unauthorized', message: 'action is not authorized.' });
+        }
+    }
+
 };
 
 export const isAuthenticated = passport.authenticate('jwt', { session: false });

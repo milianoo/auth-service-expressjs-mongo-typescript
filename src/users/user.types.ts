@@ -1,7 +1,5 @@
-export namespace Types {
-    export enum Users {
-        Admin = 1,
-        User = 2,
-        Editor = 3
-    }
+export enum UserType {
+    User = "USER",
+    Manager = "MANAGER",
+    Admin = "ADMIN",
 }

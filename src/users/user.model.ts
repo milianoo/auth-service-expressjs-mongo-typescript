@@ -1,22 +1,24 @@
 import { Schema, Model, model} from "mongoose";
 import * as bcrypt from 'bcrypt-nodejs';
 import {IUser, IUserModel} from "./user.interface";
+import {UserStatus} from './status.types';
+import {UserType} from './user.types';
 
 export const UserSchema: Schema = new Schema({
-    createdAt: { type: Date },
-    email: { type: String, required: true },
-    name: { type: String, required: true },
-    type: { type: Number, required: true },
-    password: { type: String, required: true }
+    status: { type: UserStatus },
+    email: { type: String, lowercase: true, trim: true, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    role: { type: String, required: true, default: UserType.User },
+    companyId: { type: String },
+    password: { type: String, required: true, select: false },
+    permissions: { type: Array, required: false, default: [] }
+},{
+    timestamps: true
 });
 
 UserSchema.pre("save", function (callback) {
     let user = this;
-
-    let now = new Date();
-    if (!user.createdAt) {
-        user.createdAt = now;
-    }
 
     // Break out if the password hasn't changed
     if (!user.isModified('password')) {
@@ -37,9 +39,6 @@ UserSchema.pre("save", function (callback) {
 
 UserSchema.static('comparePassword', (password: string, hash: string, callback: Function) => {
 
-    console.log(password);
-    console.log(hash);
-
     bcrypt.compare(password, hash, function(err, isMatch) {
         if (err) return callback(err);
         callback(null, isMatch);
@@ -52,4 +51,4 @@ UserSchema.static('findByEmail', (email: string, callback: Function) => {
 
 export type UserModel = Model<IUser> & IUserModel & IUser;
 
-export const User: UserModel = <UserModel>model<IUser>("User", UserSchema);
+export const User = <UserModel>model<IUser>("User", UserSchema);

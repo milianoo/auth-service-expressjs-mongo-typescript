@@ -1,17 +1,28 @@
 import {Document} from "mongoose";
+import {UserStatus} from './status.types';
 
 export interface IUser extends Document {
 
+    status: UserStatus;
+
     email?: string;
 
-    name?: string;
+    firstName?: string;
 
-    password?: string
+    lastName?: string;
 
-    type?: number
+    companyId?: string;
+
+    password?: string;
+
+    role?: number;
+
+    permissions: Array<number>;
 }
 
 export interface IUserModel {
+
+    name(): string;
 
     comparePassword(password: string, hash: string, callback: Function): void;
 
