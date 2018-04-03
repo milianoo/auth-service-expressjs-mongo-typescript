@@ -11,6 +11,11 @@ export class UserRouter {
         this.router = express.Router();
 
         this.router
+            .route('/users/password/reset')
+            .post(controller.passwordForgot)
+            .put(controller.updatePassword);
+
+        this.router
             .route('/users/exist/:username')
             .get(controller.isUsernameAvailable);
         

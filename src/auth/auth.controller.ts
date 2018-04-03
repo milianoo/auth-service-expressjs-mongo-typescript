@@ -5,7 +5,6 @@ import config from "../bin/config";
 import {User} from "../users/user.model";
 import {Roles} from '../users/roles/roles.config';
 import {Access} from '../users/user.access';
-import {sendResetPasswordEmail} from './forgot-password.notifier';
 
 let activeTokens = [];
 
@@ -14,11 +13,15 @@ let getAuthTokenJsonResponse = function (user) {
     user = user.toObject();
     delete user.password;
 
-    console.log(user);
-
     let token = jwt.sign(user, config.secret, {
         expiresIn: '1 day'
     });
+
+    // tokenManager.addToken(user._id)
+    //     .then((token) => {
+    //
+    //     });
+
     let refreshToken = randToken.uid(256);
     activeTokens[ refreshToken ] = user._id;
     return { token: token, refreshToken: refreshToken };
@@ -92,13 +95,6 @@ export const revokeToken = (req, res) => {
         res.send(204);
     }else{
         res.send(304);
-    }
-};
-
-export const passwordForgot = (req, res) => {
-
-    if (req.body.email) {
-        // sendResetPasswordEmail()
     }
 };
 

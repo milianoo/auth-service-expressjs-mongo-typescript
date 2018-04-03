@@ -15,10 +15,6 @@ export class AuthRouter {
             .route('/authenticate/token')
             .post(authController.refreshToken)
             .delete(authController.revokeToken);
-
-        this.router
-            .route('/authenticate/forgot')
-            .post(authController.passwordForgot);
     }
 }
 

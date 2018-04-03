@@ -3,8 +3,70 @@ import {User} from "./user.model";
 import * as lodash from 'lodash';
 import { Request, Response, NextFunction } from 'express';
 import {UserStatus} from './status.types';
-import {sendVerificationEmail} from './user.notifier';
 import {Company} from '../company/company.model';
+import * as tokenManager from '../tokens/token.controller';
+
+import {sendResetPasswordEmail} from '../notifications/forgot-password.notifier';
+import {sendVerificationEmail} from '../notifications/email-verification.notifier';
+
+
+const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+export const passwordForgot = (req, res) => {
+
+    if (req.body.email) {
+        User.findOne({email: req.body.email})
+            .then( user => {
+
+                if (user) {
+                    tokenManager.addToken(user.email)
+                        .then((token) => {
+
+                            sendResetPasswordEmail(token.code, user.email);
+
+                            res.status(200).send({});
+                        });
+                }else {
+                    res.status(404).send({ reason: 'NotFound', message: 'user not found' });
+                }
+
+            })
+
+
+    }
+};
+
+export const updatePassword = (req, res) => {
+
+    if (req.body.code &&
+        req.body.email && req.body.password
+    ) {
+        tokenManager.verifyToken(req.body.code, req.body.email)
+            .then((token) => {
+
+                if (token) {
+                    tokenManager.removeToken(token.code);
+
+                    User.findOne({ email: token.reference })
+                        .then((user) => {
+                            if (user) {
+                                user.password = req.body.password;
+                                user.save()
+                                    .then(() => res.status(200).send({}))
+                                    .catch(() => res.status(400).send({ reason: 'BadRequest', message: 'failed to update user' }));
+                            }else {
+                                res.status(400).send({ reason: 'BadRequest', message: 'failed to find user' });
+                            }
+                        })
+                        .catch(() => res.status(400).send({ reason: 'BadRequest', message: 'failed to get user' }));
+                }else {
+                    res.status(400).send({ reason: 'BadRequest', message: 'could not validate the request' });
+                }
+            });
+    }
+};
 
 export const isUsernameAvailable = (req: Request, res: Response) => {
 
@@ -60,7 +122,9 @@ export const activateUser = (req: Request, res: Response) => {
 
 export const resendEmail = (req: Request, res: Response) => {
 
-    sendVerificationEmail(req.user._id, req.user.email, req.user.name);
+    let fullname = `${capitalizeFirstLetter(req.user.lastName)}`;
+
+    sendVerificationEmail(req.user._id, req.user.email, fullname);
 
     res.status(200).send();
 };
@@ -96,7 +160,9 @@ export const createUser = (req: Request, res: Response) => {
                         user.save()
                             .then(() => {
 
-                                sendVerificationEmail(user._id, user.email, `${user.firstName} ${user.lastName}`);
+                                let fullname = `${capitalizeFirstLetter(user.lastName)}`;
+
+                                sendVerificationEmail(user._id, user.email, fullname);
 
                                 res.status(201).send({ message: 'new user created.', data: user });
                             })
