@@ -1,13 +1,13 @@
 import * as mandrill from 'mandrill-api/mandrill';
+import {ICompany} from '../company/company.interface';
+import {IUser} from '../users/user.interface';
 
 let mandrill_client = new mandrill.Mandrill('PNXkH2dFdBGpzDaRTKCsiw');
 
-export const sendVerificationEmail = (redirect_url: string, code: string, email: string, fullName: string) => {
-
-    let link = `${redirect_url}?activation=${code}&user=${email}`;
+export const sendCompanyInfoNotification = (email: string, fullName: string, company: ICompany, user: IUser) => {
 
     mandrill_client.messages.sendTemplate({
-        template_name: "vsma_account_verification",
+        template_name: "vsma_information_account",
         template_content: [],
         message: {
             "from_email": "info@finlex.de",
@@ -17,8 +17,11 @@ export const sendVerificationEmail = (redirect_url: string, code: string, email:
                 { email: email, name: fullName }
             ],
             "global_merge_vars": [
-                { name: 'anrede_nachname', content: 'Herr ' + fullName },
-                { name: 'verification_link', content: link }
+                { name: 'company_name', content: company.name },
+                { name: 'company_website', content: company.website },
+                { name: 'company_revenue', content: company.revenue },
+                { name: 'company_user', content: `${user.title} ${ user.lastName}` },
+                { name: 'company_user_email', content: user.email }
             ]
         }
     }, function( error, response ) {
