@@ -162,7 +162,7 @@ export const createUser = (req: Request, res: Response) => {
                         user.save()
                             .then(() => {
 
-                                let fullname = `${capitalizeFirstLetter(req.user.title)} ${capitalizeFirstLetter(req.user.lastName)}`;
+                                let fullname = `${capitalizeFirstLetter(user.title)} ${capitalizeFirstLetter(user.lastName)}`;
 
                                 sendVerificationEmail(req.body.redirect, user._id, user.email, fullname);
 

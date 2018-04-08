@@ -7,7 +7,7 @@ let mandrill_client = new mandrill.Mandrill('PNXkH2dFdBGpzDaRTKCsiw');
 export const sendCompanyInfoNotification = (email: string, fullName: string, company: ICompany, user: IUser) => {
 
     mandrill_client.messages.sendTemplate({
-        template_name: "vsma_information_account",
+        template_name: "vsma_information_company_info_updated",
         template_content: [],
         message: {
             "from_email": "info@finlex.de",
