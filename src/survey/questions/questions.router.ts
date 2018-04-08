@@ -10,6 +10,10 @@ export class QuestionsRouter {
         this.router = express.Router();
 
         this.router
+            .route('/survey/questions/import')
+            .post(isAuthenticated, questionsController.importQuestions);
+
+        this.router
             .route('/survey/questions/:id')
             .get(isAuthenticated, questionsController.getQuestion)
             .put(isAuthenticated, questionsController.updateQuestion)

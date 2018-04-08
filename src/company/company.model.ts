@@ -13,6 +13,10 @@ export const CompanySchema: Schema = new Schema({
     timestamps: true
 });
 
+CompanySchema.methods.isProfileCompleted = function () {
+    return !!(this.name && this.address.city && this.address.street && this.address.code && this.website && this.revenue);
+};
+
 export type CompanyModel = Model<ICompany> & ICompanyModel & ICompany;
 
 export const Company: CompanyModel = <CompanyModel>model<ICompany>("Company", CompanySchema);

@@ -18,6 +18,10 @@ export class SurveyRouter {
             .post(isAuthenticated, controller.updateAnswer);
 
         this.router
+            .route('/survey/:id/close')
+            .post(isAuthenticated, controller.closeAndSend);
+
+        this.router
             .route('/survey/:id')
             .get(isAuthenticated, controller.getSurvey);
 

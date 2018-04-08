@@ -27,32 +27,12 @@ export class UserRouter {
         this.router
             .route('/users')
             .post(controller.createUser)
-            .get(
-                isAuthenticated,
-                authorize([
-                    Access.View_Management_Users,
-                    Access.Edit_Management_Users
-                ]),
-                controller.getUsers
-            );
+            .get(isAuthenticated, controller.getUsers);
 
         this.router
             .route('/users/:id')
-            .get(
-                isAuthenticated,
-                controller.getUser
-            )
-            .put(
-                isAuthenticated,
-                controller.updateUser
-            )
-            .delete(
-                isAuthenticated,
-                authorize([
-                    Access.View_Management_Users,
-                    Access.Edit_Management_Users
-                ]),
-                controller.deleteUser
-            );
+            .get(isAuthenticated, controller.getUser)
+            .put(isAuthenticated, controller.updateUser)
+            .delete(isAuthenticated, controller.deleteUser);
     }
 }

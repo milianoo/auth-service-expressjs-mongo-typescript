@@ -16,6 +16,6 @@ export const verifyToken = (code: string, entityRef: string) => {
     });
 };
 
-export const removeToken = (code: string) => {
-    return Token.findOneAndRemove({code: code});
+export const removeToken = (_id: string) => {
+   Token.remove({_id: _id}).then(() => console.log(`token ${_id} removed.`));
 };

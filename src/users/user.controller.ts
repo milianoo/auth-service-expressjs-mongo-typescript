@@ -1,14 +1,14 @@
 
 import {User} from "./user.model";
 import * as lodash from 'lodash';
-import { Request, Response, NextFunction } from 'express';
+import {UserType} from './user.types';
 import {UserStatus} from './status.types';
+import { Request, Response, NextFunction } from 'express';
 import {Company} from '../company/company.model';
 import * as tokenManager from '../tokens/token.controller';
 
 import {sendResetPasswordEmail} from '../notifications/forgot-password.notifier';
 import {sendVerificationEmail} from '../notifications/email-verification.notifier';
-
 
 const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -16,7 +16,7 @@ const capitalizeFirstLetter = (string) => {
 
 export const passwordForgot = (req, res) => {
 
-    if (req.body.email) {
+    if (req.body.email && req.body.redirect) {
         User.findOne({email: req.body.email})
             .then( user => {
 
@@ -24,7 +24,7 @@ export const passwordForgot = (req, res) => {
                     tokenManager.addToken(user.email)
                         .then((token) => {
 
-                            sendResetPasswordEmail(token.code, user.email);
+                            sendResetPasswordEmail(req.body.redirect, token.code, user.email);
 
                             res.status(200).send({});
                         });
@@ -33,8 +33,6 @@ export const passwordForgot = (req, res) => {
                 }
 
             })
-
-
     }
 };
 
@@ -47,8 +45,7 @@ export const updatePassword = (req, res) => {
             .then((token) => {
 
                 if (token) {
-                    tokenManager.removeToken(token.code);
-
+                    tokenManager.removeToken(token._id);
                     User.findOne({ email: token.reference })
                         .then((user) => {
                             if (user) {
@@ -114,7 +111,6 @@ export const activateUser = (req: Request, res: Response) => {
                     .then(() => res.json(user));
             })
             .catch(err => res.status(400).send({ reason: 'BadRequest', message: 'failed to get the user.' }));
-
     }else {
         res.status(400).send({ reason: 'BadRequest', message: 'invalid request format.' });
     }
@@ -122,17 +118,19 @@ export const activateUser = (req: Request, res: Response) => {
 
 export const resendEmail = (req: Request, res: Response) => {
 
-    let fullname = `${capitalizeFirstLetter(req.user.lastName)}`;
+    let fullname = `${capitalizeFirstLetter(req.user.title)} ${capitalizeFirstLetter(req.user.lastName)}`;
 
-    sendVerificationEmail(req.user._id, req.user.email, fullname);
+    let redirect: string = req.query.redirect;
+
+    sendVerificationEmail(redirect, req.user._id, req.user.email, fullname);
 
     res.status(200).send();
 };
 
 export const createUser = (req: Request, res: Response) => {
 
-    if (req.body.email) {
-        let domain = req.body.email.split('@')[1];
+    if (req.body.user.email) {
+        let domain = req.body.user.email.split('@')[1];
 
         let query = { domain: domain },
             options = { upsert: true, new: true, setDefaultsOnInsert: true };
@@ -146,9 +144,13 @@ export const createUser = (req: Request, res: Response) => {
 
                 let user = new User();
 
-                let fields = Object.keys(req.body);
+                let fields: any = Object.keys(req.body.user);
+
+                delete fields.role;
+                delete fields.permissions;
+
                 lodash.forEach(fields, field => {
-                    user[ field ] = req.body[ field ];
+                    user[ field ] = req.body.user[ field ];
                 });
 
                 user.companyId = company._id;
@@ -160,9 +162,9 @@ export const createUser = (req: Request, res: Response) => {
                         user.save()
                             .then(() => {
 
-                                let fullname = `${capitalizeFirstLetter(user.lastName)}`;
+                                let fullname = `${capitalizeFirstLetter(req.user.title)} ${capitalizeFirstLetter(req.user.lastName)}`;
 
-                                sendVerificationEmail(user._id, user.email, fullname);
+                                sendVerificationEmail(req.body.redirect, user._id, user.email, fullname);
 
                                 res.status(201).send({ message: 'new user created.', data: user });
                             })
@@ -175,7 +177,6 @@ export const createUser = (req: Request, res: Response) => {
                         console.log(err);
                         return res.status(400).send({ reason: 'BadRequest', message: 'required fields are not set.' });
                     });
-
             });
     }
 };
@@ -191,7 +192,13 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
             next(err);
         }
 
-        let fields = Object.keys(req.body);
+        let fields : any = Object.keys(req.body);
+
+        if (req.user.role != UserType.Admin){
+            delete fields.role;
+            delete fields.permissions;
+        }
+
         lodash.forEach(fields, field => {
                 user[ field ] = req.body[ field ];
         });

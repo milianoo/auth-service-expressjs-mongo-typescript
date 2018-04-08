@@ -1,6 +1,9 @@
 import * as lodash from 'lodash';
 import {Request, Response} from 'express';
 import { Question } from './questions.model';
+import {Survey} from '../survey.model';
+import * as connector from '../../vsma-connector/vsma.controller';
+import {UserType} from '../../users/user.types';
 
 export const createQuestion = (req: Request, res: Response) => {
 
@@ -34,32 +37,33 @@ export const createQuestion = (req: Request, res: Response) => {
 export const getQuestions = (req: Request, res: Response) => {
 
     Question.find(req.query)
+        .sort('order')
         .then((questions) => {
             res.send(questions);
         }).catch(err => {
-            res.send({ reason: 'BadRequest', message: 'failed to get the questions.' });
+            res.status(400).send({ reason: 'BadRequest', message: 'failed to get the questions.' });
         });
 };
 
 export const getQuestion = (req: Request, res: Response) => {
 
     if (!req.params || !req.params.id){
-        return res.send({ reason: 'BadRequest', message: 'field "id" is required.' });
+        return res.status(400).send({ reason: 'BadRequest', message: 'field "id" is required.' });
     }
 
     Question.findOne({ _id: req.params.id})
         .then((question) => {
-            res.send(question);
+            res.status(200).send(question);
         })
         .catch(err => {
-            res.send({ reason: 'BadRequest', message: 'failed to get the question.' });
+            res.status(400).send({ reason: 'BadRequest', message: 'failed to get the question.' });
         });
 };
 
 export const updateQuestion = (req: Request, res: Response) => {
 
     if (!req.params || !req.params.id){
-        return res.send({ reason: 'BadRequest', message: 'field "id" is required.' });
+        return res.status(400).send({ reason: 'BadRequest', message: 'field "id" is required.' });
     }
 
     Question.findById( req.params.id)
@@ -74,7 +78,7 @@ export const updateQuestion = (req: Request, res: Response) => {
                 .then(() => res.json(question))
                 .catch((err) => {
                     console.log(err);
-                    return res.send({ reason: 'BadRequest', message: 'failed to save the question.' });
+                    return res.status(400).send({ reason: 'BadRequest', message: 'failed to save the question.' });
                 });
         });
 };
@@ -82,16 +86,37 @@ export const updateQuestion = (req: Request, res: Response) => {
 export const deleteQuestion = (req: Request, res: Response) => {
 
     if (!req.params || !req.params.id){
-        return res.send({ reason: 'BadRequest', message: 'field "id" is required.' });
+        return res.status(400).send({ reason: 'BadRequest', message: 'field "id" is required.' });
     }
 
-    // TODO : remove question's answers from survey answers
+    Survey.update(
+        {"answers.questionId": req.params.id},
+        {
+            $pull : { "answers": {"questionId": req.params.id } },
+            $set: { $inc : { "answered_count": -1 } }
+        }).then(() => console.info(`question ${req.params.id} references removed.`));
 
     Question.findByIdAndRemove(req.params.id, (err) => {
         if (err)
             res.send(err);
 
         res.json({ message: 'question removed.' });
+    });
+
+};
+
+export const importQuestions = (req: Request, res: Response) => {
+
+    if (req.user.role != UserType.Admin) {
+        return res.status(403).send({});
+    }
+
+    connector.importQuestions().subscribe( succeed => {
+        if (succeed) {
+            res.status(201).send({});
+        }else {
+            return res.status(400).send({ reason: 'BadRequest', message: 'could not import questions.' });
+        }
     });
 
 };

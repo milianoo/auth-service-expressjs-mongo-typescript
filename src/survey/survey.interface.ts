@@ -1,16 +1,21 @@
 import {Document} from "mongoose";
+import {ICompany} from '../company/company.interface';
 
-export interface ISurveys extends Document {
+export interface ISurvey extends Document {
 
-    owner: string,
+    company: string | ICompany,
 
     domain: string,
 
-    answers: Array<number>,
+    answers: Array<any>,
 
-    completed: boolean
+    completed: boolean,
 
-    closed: boolean
+    closed: boolean,
+
+    sent: boolean,
+
+    limits: Array<string>
 }
 
 export interface ISurveysModel {

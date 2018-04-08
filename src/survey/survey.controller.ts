@@ -1,6 +1,11 @@
 import * as _ from 'lodash';
 import {Request, Response} from 'express';
 import {Survey} from './survey.model';
+import {createCustomerAccount} from '../vsma-connector/vsma.controller';
+import {Question} from './questions/questions.model';
+import {sendSurveyCloseNotification} from '../notifications/survey-close.notifier';
+import {IUser} from '../users/user.interface';
+import {ICompany} from '../company/company.interface';
 
 export const createSurvey = (req: Request, res: Response) => {
 
@@ -13,7 +18,7 @@ export const createSurvey = (req: Request, res: Response) => {
 
     let userDomain = req.user.email.split('@')[1];
 
-    survey.owner = req.user._id;
+    survey.company = req.user.companyId;
     survey.domain = userDomain;
 
     survey.save()
@@ -54,7 +59,10 @@ export const findUsersSurvey = (req: Request, res: Response) => {
 export const getSurveysStatistics = (req: Request, res: Response) => {
 
     Survey.find({})
+        .populate('company')
         .select("-answers")
+        .exec()
+
         .then(data => res.send(data));
 
 };
@@ -66,6 +74,7 @@ export const updateAnswer = (req: Request, res: Response) => {
     let answers = req.body.answers;
 
     if (surveyId) {
+
         Survey.findOne({ _id: surveyId })
             .then((survey) => {
                 let questionAnswer = _.find(survey.answers, { questionId: questionId });
@@ -85,7 +94,10 @@ export const updateAnswer = (req: Request, res: Response) => {
                     () => res.status(200).send(survey),
                     (err) => {
                         console.error(err);
-                        res.send({ reason: 'BadRequest', message: 'failed to save the survey.' });
+                        res.send({ reason: 'BadRequest',
+                            message: 'failed to save the survey.',
+                            stack: err
+                        });
                     }
                 );
 
@@ -95,4 +107,52 @@ export const updateAnswer = (req: Request, res: Response) => {
                 res.send({ reason: 'BadRequest', message: 'failed to get the survey.' });
             });
     }
+};
+
+export const closeAndSend = (req: Request, res: Response) => {
+
+    if (!req.params || !req.params.id) {
+        return res.send({ reason: 'BadRequest', message: 'field "id" is required.' });
+    }
+    let questions: any[];
+    Question.find({})
+
+        .then((data => questions = data))
+
+        .then(() => {
+
+            Survey.findOne({ _id: req.params.id })
+                .populate('company')
+                .exec()
+                .then((survey) => {
+
+                    if (survey) {
+
+                        createCustomerAccount(survey, questions);
+
+                        sendSurveyCloseNotification('milad.rezazadeh@finlex.de', 'Milad Rezazadeh', <ICompany>survey.company, <IUser>req.user, survey, questions);
+
+                        survey.closed = true;
+                        survey.limits = req.body.summe;
+
+                        survey.save()
+                            .then(() => res.status(200).send({ message: 'survey closed successfully.' }))
+                            .catch((err) => {
+                                console.error('failed to save the survey.', err);
+                                res.status(200).send({ message: 'failed to save the survey.' })
+                            });
+                    }
+                    else{
+                        console.error(`survey ${req.params.id} not found.`);
+                        res.status(404).send({ reason: 'NotFound', message: 'failed to get the survey.' });
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                    res.send({ reason: 'BadRequest', message: 'failed to get the survey.' });
+                });
+
+        });
+
+
 };

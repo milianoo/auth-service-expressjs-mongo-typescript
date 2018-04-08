@@ -6,13 +6,19 @@ export interface ICompany extends Document {
 
     email?: string;
 
-    address?: object;
+    address?: {
+        street: string;
+        city: string;
+        code: string;
+    };
 
     website?: string;
 
     revenue?: string;
+
+    company: string | ICompany;
 }
 
 export interface ICompanyModel {
-
+    isProfileCompleted(): boolean;
 }

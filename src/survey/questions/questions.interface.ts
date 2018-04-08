@@ -12,7 +12,7 @@ export interface IQuestion extends Document {
 
     type?: number;
 
-    relation?: string;
+    relation?: number;
 
     answers?: Array<string>
 }

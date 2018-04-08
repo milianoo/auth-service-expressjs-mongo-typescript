@@ -1,7 +1,10 @@
 
 import * as lodash from 'lodash';
 import { Request, Response, NextFunction } from 'express';
-import {Company} from './company.model';
+import {Company, CompanyModel} from './company.model';
+import {ICompany} from './company.interface';
+import {sendCompanyInfoNotification} from '../notifications/company-info.notifier';
+import {IUser} from '../users/user.interface';
 
 export const getCompany = (req: Request, res: Response, next: NextFunction) => {
 
@@ -60,7 +63,7 @@ export const updateCompany = (req: Request, res: Response, next: NextFunction) =
         return res.send({ reason: 'BadRequest', message: 'field "id" is required.' });
     }
 
-    Company.findById( req.params.id,  (err, company) => {
+    Company.findById( req.params.id,  (err, company: CompanyModel) => {
         if (err){
             next(err);
         }
@@ -71,7 +74,16 @@ export const updateCompany = (req: Request, res: Response, next: NextFunction) =
         });
 
         company.save()
-            .then(() => res.json(company))
+            .then(() => {
+                console.log(`company ${company.id} updated.`);
+
+                if (company.isProfileCompleted()) {
+                    console.log(`sending company ${company.id} info notifications.`);
+                    sendCompanyInfoNotification('milad.rezazadeh@finlex.de', 'Milad Rezazadeh', company, <IUser>req.user);
+                }
+
+                res.json(company);
+            })
             .catch((err) => {
                 console.log(err);
                 return res.send({ reason: 'BadRequest', message: 'failed to save the company.' });
