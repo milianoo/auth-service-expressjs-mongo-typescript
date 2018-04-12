@@ -3,7 +3,6 @@ import * as _ from 'lodash';
 import {Observable} from 'rxjs';
 import {Question} from '../survey/questions/questions.model';
 import {QuestionType} from '../survey/questions/questions.enum';
-import {UserType} from '../users/user.types';
 
 let config = {
     user: 'sa',
@@ -41,7 +40,7 @@ let createCustomer = (survey) => {
         let request = new sql.Request();
 
         let customer_query = "INSERT INTO tbl_sc_kunde (Makler_ID, Firma_ID, FirmaName, Strasse, PLZOrt, Webseite, Umsatz, Branche_ID, ShowFragebogen, ShowVorschlag, ShowAntrag) " +
-            `VALUES (1, 1, '${survey.company.name}', '${survey.company.address.street}', '${survey.company.address.code} ${survey.company.address.city}', '${survey.company.website}', '${survey.company.revenue}', 1, 1, 1, 1); 
+            `VALUES (1, 1, '${survey.company.name}', '${survey.company.address.street}', '${survey.company.address.code} ${survey.company.address.city}', '${survey.company.website}', '${survey.company.revenue}', 1, 1, 0, 0); 
              select * from tbl_sc_kunde where FirmaName = '${survey.company.name}'`;
 
         request.query(customer_query, (err, result) => {
@@ -50,17 +49,20 @@ let createCustomer = (survey) => {
                 observer.error(err);
             }
 
+
             let customerId = result.recordset[0].ID;
             console.log(`new customer inserted to vsma : ${customerId}`);
 
-            let angbot_anterag_query = "INSERT INTO tbl_sc_kunde (Makler_ID, Firma_ID, FirmaName, Strasse, PLZOrt, Webseite, Umsatz, Branche_ID, ShowFragebogen, ShowVorschlag, ShowAntrag) " +
-            `VALUES (1, 1, '${survey.company.name}', '${survey.company.address.street}', '${survey.company.address.code} ${survey.company.address.city}', '${survey.company.website}', '${survey.company.revenue}', 1, 1, 1, 1); 
-             select * from tbl_sc_kunde where FirmaName = '${survey.company.name}'`;
-            request.query(customer_query, (err, result) => {
+            let angbot_anterag_query = `INSERT INTO tbl_sc_angebot (Kunde_ID) VALUES (${customerId}); 
+                 INSERT INTO tbl_sc_antrag (Kunde_ID) VALUES (${customerId});
+                 select * from tbl_sc_angebot where Kunde_ID = '${customerId}';`;
+            request.query(angbot_anterag_query, (err, result) => {
                 if (err) {
                     console.log(err);
                     observer.error(err);
                 }
+
+                console.log(`dummy angebot and antrag  inserted to vsma for customer : ${customerId}`);
 
                 observer.next(customerId);
             });
@@ -147,41 +149,47 @@ export const importQuestions = () => {
 
 export const createCustomerAccount = (survey: any, questions: any[]) => {
 
-    sql.connect(config, function (err) {
-        if(err) {
-            console.log('failed to connect to sql server', err);
-        }
+    return Observable.create((observer) => {
 
-        createCustomer(survey).subscribe(
-            (customerId) => {
-
-                if (customerId) {
-                    populateAnswers(survey, questions, ).subscribe((answers) =>{
-
-                        let fields = Object.keys(answers);
-                        let values = [];
-                        Object.keys(answers).forEach(k => {
-                            values.push(answers[k]);
-                        });
-
-                        let answer_query = `INSERT INTO tbl_sc_kundenfragebogen 
-                            (Kunde_ID, ${fields} )
-                        VALUES (${customerId}, ${values}); select * from tbl_sc_kundenfragebogen where Kunde_ID = '${customerId}'`;
-
-                        let request = new sql.Request();
-                        request.query(answer_query, (err, result) => {
-
-                            console.log(result);
-                        });
-
-                    });
-
-                }else {
-                    console.error('failed to create customer.');
-                }
+        sql.connect(config, function (err) {
+            if(err) {
+                console.log('failed to connect to sql server', err);
             }
-        );
+
+            createCustomer(survey).subscribe(
+                (customerId) => {
+
+                    if (customerId) {
+                        populateAnswers(survey, questions, ).subscribe((answers) =>{
+
+                            let fields = Object.keys(answers);
+                            let values = [];
+                            Object.keys(answers).forEach(k => {
+                                values.push(answers[k]);
+                            });
+
+                            let answer_query = `INSERT INTO tbl_sc_kundenfragebogen 
+                            (Kunde_ID, ${fields} )
+                             VALUES (${customerId}, ${values}); select * from tbl_sc_kundenfragebogen where Kunde_ID = '${customerId}';
+                             UPDATE tbl_sc_kunde SET ShowVorschlag=1 , ShowAntrag=1 WHERE ID = '${customerId}'`;
+
+                            let request = new sql.Request();
+                            request.query(answer_query, (err, result) => {
+                                sql.close();
+                                observer.next();
+                            });
+
+                        });
+
+                    }else {
+                        console.error('failed to create customer.');
+                    }
+                }
+            );
+        });
     });
+
+
 
 };
 

@@ -30,14 +30,12 @@ let extractQuestions = (questions, survey) => {
     }
 };
 
-export const sendSurveyCloseNotification = (email: string, fullName: string, company: ICompany, user: IUser, survey: ISurvey, questions: IQuestion[]) => {
+export const sendSurveyCloseNotification = (company: ICompany, user: IUser, survey: ISurvey, questions: IQuestion[]) => {
 
     let summe = survey.limits.map((limit) => {
         return { value: limit };
     });
     let answers = extractQuestions(questions, survey);
-
-    console.log(answers);
 
     mandrill_client.messages.sendTemplate({
         template_name: "vsma_questionnaire_completed",
@@ -45,9 +43,10 @@ export const sendSurveyCloseNotification = (email: string, fullName: string, com
         message: {
             "from_email": "info@finlex.de",
             "from_name": "VDMA Cyber-Police TM (VCP)",
-            "subject": "VCP: Bitte bestätigen Sie Ihren Zugang",
+            "subject": "VCP: Neue Anfrage",
             "to": [
-                { email: email, name: fullName }
+                { email: "sebastian.klapper@finlex.de", name: "Sebastian Klapper" },
+                { email: "tim.buschlinger@finlex.de", name: "Tim Buschlinger" }
             ],
             "global_merge_vars": [
                 { name: 'company_name', content: company.name },

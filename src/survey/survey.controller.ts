@@ -116,7 +116,7 @@ export const closeAndSend = (req: Request, res: Response) => {
     }
     let questions: any[];
     Question.find({})
-
+        .sort('order')
         .then((data => questions = data))
 
         .then(() => {
@@ -128,19 +128,25 @@ export const closeAndSend = (req: Request, res: Response) => {
 
                     if (survey) {
 
-                        createCustomerAccount(survey, questions);
+                        createCustomerAccount(survey, questions).subscribe(() => {
 
-                        sendSurveyCloseNotification('milad.rezazadeh@finlex.de', 'Milad Rezazadeh', <ICompany>survey.company, <IUser>req.user, survey, questions);
+                            sendSurveyCloseNotification(<ICompany>survey.company, <IUser>req.user, survey, questions);
 
-                        survey.closed = true;
-                        survey.limits = req.body.summe;
+                            console.log('closing survey...');
 
-                        survey.save()
-                            .then(() => res.status(200).send({ message: 'survey closed successfully.' }))
-                            .catch((err) => {
-                                console.error('failed to save the survey.', err);
-                                res.status(200).send({ message: 'failed to save the survey.' })
-                            });
+                            survey.closed = true;
+                            survey.sent = true;
+
+                            survey.limits = req.body.summe;
+
+                            survey.save()
+                                .then(() => res.status(200).send({ message: 'survey closed successfully.' }))
+                                .catch((err) => {
+                                    console.error('failed to save the survey.', err);
+                                    res.status(200).send({ message: 'failed to save the survey.' })
+                                });
+
+                        });
                     }
                     else{
                         console.error(`survey ${req.params.id} not found.`);
