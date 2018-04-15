@@ -12,6 +12,7 @@ export const UserSchema: Schema = new Schema({
     lastName: { type: String, required: true },
     role: { type: String, required: true, default: UserType.User },
     companyId: { type: String },
+    termsAndConditions: { type: Boolean, required: true },
     password: { type: String, required: true, select: false },
     permissions: { type: Array, required: false, default: [] }
 },{

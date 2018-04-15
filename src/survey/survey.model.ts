@@ -7,6 +7,7 @@ export const SurveysSchema: Schema = new Schema({
     domain: { type: String, required: true },
     answers: { type: [ SurveyAnswerSchema ], default: [] },
     answered_count: { type: Number, default: 0 },
+    termsAndConditions: { type: Boolean, required: true, default: false },
     closed: { type: Boolean, default: false },
     sent: { type: Boolean, default: false },
     limits: { type: Array, default: [] }

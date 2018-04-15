@@ -7,12 +7,10 @@ import app from'../app';
 import * as debug from 'debug';
 import * as http from 'http';
 
-
 /**
  * Debug Mode.
  */
-const debugServer = debug('authentication:server');
-
+const log = debug('api:server');
 
 /**
  * Get port from environment and store in Express.
@@ -61,6 +59,7 @@ function normalizePort(val) {
 
 function onError(error) {
   if (error.syscall !== 'listen') {
+    log(error);
     throw error;
   }
 
@@ -71,11 +70,11 @@ function onError(error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      log(bind + ' requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      log(bind + ' is already in use');
       process.exit(1);
       break;
     default:
@@ -92,5 +91,11 @@ function onListening() {
   let bind = typeof address === 'string'
     ? 'pipe ' + address
     : 'port ' + address.port;
-    debugServer('server started istening on ' + bind);
+    log('server started istening on ' + bind);
+
+    let env = process.env.NODE_ENV || 'development';
+    if ('development' == env) {
+        log('running mode : ' + process.env.NODE_ENV);
+    }
+
 }

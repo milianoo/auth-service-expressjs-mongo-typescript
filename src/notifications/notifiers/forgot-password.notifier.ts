@@ -1,6 +1,7 @@
 import * as mandrill from 'mandrill-api/mandrill';
+import * as config from 'config';
 
-let mandrill_client = new mandrill.Mandrill('PNXkH2dFdBGpzDaRTKCsiw');
+let mandrill_client = new mandrill.Mandrill(config.get('mandrill_key'));
 
 export const sendResetPasswordEmail = (redirect_url: string, code: string, email: string) => {
 

@@ -1,12 +1,15 @@
 import * as mongoose from  'mongoose' ;
-import config from './config';
+import * as debug from 'debug';
+import * as config from 'config';
+
+const log = debug('api:database');
 
 class MongoDatabase {
 
     databaseUri: string;
 
     constructor() {
-        this.databaseUri = config.mongodbPath + config.databaseName;
+        this.databaseUri = config.get('mongodbPath') + config.get('databaseName');
 
         mongoose.connection.on('connected', this.onConnected);
 
@@ -16,7 +19,7 @@ class MongoDatabase {
 
         process.on('SIGINT', function() {
             mongoose.connection.close(function () {
-                console.log('Mongoose default connection disconnected through app termination');
+                log('Mongoose default connection disconnected through app termination');
                 process.exit(0);
             });
         });
@@ -24,19 +27,19 @@ class MongoDatabase {
 
     public connect() {
         mongoose.connect(this.databaseUri).then(function () {
-            console.info('Mongoose connected to mongodb instance.');
+            log('Mongoose connected to mongodb instance.');
         });
         mongoose.set('debug', true);
     }
     private onConnected() {
-        console.log(`Mongoose default connection open to ${this.databaseUri}`);
+        log(`Mongoose default connection open to ${this.databaseUri}`);
     }
     private onError(err) {
-        console.log('Mongoose default connection error: ' + err);
+        log('Mongoose default connection error: ' + err);
     }
     private onDisconnected() {
-        console.log('Mongoose default connection disconnected');
+        log('Mongoose default connection disconnected');
     }
 }
 
-export const Database = new MongoDatabase();
+export const MongoDb = new MongoDatabase();

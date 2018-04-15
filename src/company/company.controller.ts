@@ -2,8 +2,7 @@
 import * as lodash from 'lodash';
 import { Request, Response, NextFunction } from 'express';
 import {Company, CompanyModel} from './company.model';
-import {ICompany} from './company.interface';
-import {sendCompanyInfoNotification} from '../notifications/company-info.notifier';
+import {sendCompanyInfoNotification} from '../notifications/notifiers/company-info.notifier';
 import {IUser} from '../users/user.interface';
 
 export const getCompany = (req: Request, res: Response, next: NextFunction) => {

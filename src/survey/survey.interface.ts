@@ -16,6 +16,8 @@ export interface ISurvey extends Document {
     sent: boolean,
 
     limits: Array<string>
+
+    termsAndConditions: boolean;
 }
 
 export interface ISurveysModel {

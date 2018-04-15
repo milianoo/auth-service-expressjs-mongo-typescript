@@ -147,7 +147,7 @@ export const importQuestions = () => {
 
 };
 
-export const createCustomerAccount = (survey: any, questions: any[]) => {
+export const exportDataToMsSql = (survey: any, questions: any[]) => {
 
     return Observable.create((observer) => {
 

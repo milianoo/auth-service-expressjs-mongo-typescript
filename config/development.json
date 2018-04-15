@@ -1,0 +1,9 @@
+{
+    "mandrill_key": "PNXkH2dFdBGpzDaRTKCsiw",
+    "secret": "SecretForPassportJWT",
+    "mongodbPath": "mongodb://localhost:27017/",
+    "databaseName": "oauth",
+    "allowed_origins": [
+        "http://localhost:4200"
+    ]
+}

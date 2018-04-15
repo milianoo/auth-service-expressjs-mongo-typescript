@@ -1,11 +1,12 @@
 import * as mandrill from 'mandrill-api/mandrill';
 import * as _ from 'lodash';
-import {ICompany} from '../company/company.interface';
-import {IUser} from '../users/user.interface';
-import {ISurvey} from '../survey/survey.interface';
-import {IQuestion} from '../survey/questions/questions.interface';
+import {ICompany} from '../../company/company.interface';
+import {IUser} from '../../users/user.interface';
+import {ISurvey} from '../../survey/survey.interface';
+import {IQuestion} from '../../survey/questions/questions.interface';
+import * as config from 'config';
 
-let mandrill_client = new mandrill.Mandrill('PNXkH2dFdBGpzDaRTKCsiw');
+let mandrill_client = new mandrill.Mandrill(config.get('mandrill_key'));
 
 let extractQuestions = (questions, survey) => {
 

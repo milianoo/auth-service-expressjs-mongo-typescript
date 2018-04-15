@@ -1,6 +1,6 @@
 import * as passportJwt from 'passport-jwt';
 import { User } from '../users/user.model';
-import config from '../bin/config';
+import * as config from 'config';
 import * as passport from 'passport';
 import {Roles} from '../users/roles/roles.config';
 
@@ -13,7 +13,7 @@ export const AuthMiddleware = {
 
         let opts: any = {};
         opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
-        opts.secretOrKey = config.secret;
+        opts.secretOrKey = config.get('secret');
 
         passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
 

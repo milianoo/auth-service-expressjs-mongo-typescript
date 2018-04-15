@@ -1,11 +1,15 @@
 import * as _ from 'lodash';
+import * as debug from 'debug';
 import {Request, Response} from 'express';
-import {Survey} from './survey.model';
-import {createCustomerAccount} from '../vsma-connector/vsma.controller';
+import {Survey, SurveysModel} from './survey.model';
+import {exportDataToMsSql} from '../vsma-connector/vsma.controller';
 import {Question} from './questions/questions.model';
-import {sendSurveyCloseNotification} from '../notifications/survey-close.notifier';
+import {sendSurveyCloseNotification} from '../notifications/notifiers/survey-close.notifier';
 import {IUser} from '../users/user.interface';
 import {ICompany} from '../company/company.interface';
+
+const log = debug('api:survey');
+const error = debug('api:error');
 
 export const createSurvey = (req: Request, res: Response) => {
 
@@ -24,7 +28,7 @@ export const createSurvey = (req: Request, res: Response) => {
     survey.save()
         .then(_survey => res.status(201).send({ message: 'new survey created.', data: _survey }))
         .catch((err) => {
-            console.error(err);
+            error(err);
             res.status(400).send({ reason: 'BadRequest', message: 'failed to create survey.' });
         });
 };
@@ -51,7 +55,7 @@ export const findUsersSurvey = (req: Request, res: Response) => {
     Survey.findOne({ domain: userDomain })
         .then((survey) => res.send(survey))
         .catch(err => {
-            console.error(err);
+            error(err);
             res.send({ reason: 'BadRequest', message: 'failed to get the survey.' });
         });
 };
@@ -93,7 +97,7 @@ export const updateAnswer = (req: Request, res: Response) => {
                 survey.save().then(
                     () => res.status(200).send(survey),
                     (err) => {
-                        console.error(err);
+                        error(err);
                         res.send({ reason: 'BadRequest',
                             message: 'failed to save the survey.',
                             stack: err
@@ -103,7 +107,7 @@ export const updateAnswer = (req: Request, res: Response) => {
 
             })
             .catch(err => {
-                console.error(err);
+                error(err);
                 res.send({ reason: 'BadRequest', message: 'failed to get the survey.' });
             });
     }
@@ -124,37 +128,43 @@ export const closeAndSend = (req: Request, res: Response) => {
             Survey.findOne({ _id: req.params.id })
                 .populate('company')
                 .exec()
-                .then((survey) => {
+                .then((survey: SurveysModel) => {
 
                     if (survey) {
 
-                        createCustomerAccount(survey, questions).subscribe(() => {
+                        log(`exporting data to ms sql for survey ${survey._id}`);
 
-                            sendSurveyCloseNotification(<ICompany>survey.company, <IUser>req.user, survey, questions);
+                        exportDataToMsSql(survey, questions).subscribe(() => {
 
-                            console.log('closing survey...');
+                            log(`closing survey ${survey._id}`);
 
-                            survey.closed = true;
                             survey.sent = true;
-
-                            survey.limits = req.body.summe;
+                            survey.closed = true;
+                            survey.termsAndConditions = req.body.termsAndConditions;
+                            survey.limits = req.body.limits;
 
                             survey.save()
-                                .then(() => res.status(200).send({ message: 'survey closed successfully.' }))
+                                .then(() => {
+
+                                    log(`send survey notification ${survey._id}`);
+                                    sendSurveyCloseNotification(<ICompany>survey.company, <IUser>req.user, survey, questions);
+
+                                    res.status(200).send({ message: 'survey closed successfully.' });
+                                })
                                 .catch((err) => {
-                                    console.error('failed to save the survey.', err);
+                                    error('failed to save the survey.', err);
                                     res.status(200).send({ message: 'failed to save the survey.' })
                                 });
 
                         });
                     }
                     else{
-                        console.error(`survey ${req.params.id} not found.`);
+                        error(`survey ${req.params.id} not found.`);
                         res.status(404).send({ reason: 'NotFound', message: 'failed to get the survey.' });
                     }
                 })
                 .catch((err) => {
-                    console.error(err);
+                    error(err);
                     res.send({ reason: 'BadRequest', message: 'failed to get the survey.' });
                 });
 

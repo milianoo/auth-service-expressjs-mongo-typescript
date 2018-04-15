@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import * as passport from 'passport';
 import * as randToken from 'rand-token';
-import config from "../bin/config";
+import * as config from 'config';
 import {User} from "../users/user.model";
 import {Roles} from '../users/roles/roles.config';
 import {Access} from '../users/user.access';
@@ -13,7 +13,7 @@ let getAuthTokenJsonResponse = function (user) {
     user = user.toObject();
     delete user.password;
 
-    let token = jwt.sign(user, config.secret, {
+    let token = jwt.sign(user, config.get('secret'), {
         expiresIn: '1 day'
     });
 

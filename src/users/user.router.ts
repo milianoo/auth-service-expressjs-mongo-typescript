@@ -34,5 +34,6 @@ export class UserRouter {
             .get(isAuthenticated, controller.getUser)
             .put(isAuthenticated, controller.updateUser)
             .delete(isAuthenticated, controller.deleteUser);
+
     }
 }

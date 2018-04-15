@@ -17,6 +17,8 @@ export interface IUser extends Document {
 
     password?: string;
 
+    readonly termsAndConditions?: boolean;
+
     role?: number;
 
     permissions: Array<number>;

@@ -1,4 +1,5 @@
 
+import * as debug from 'debug';
 import {User} from "./user.model";
 import * as lodash from 'lodash';
 import {UserType} from './user.types';
@@ -7,8 +8,10 @@ import { Request, Response, NextFunction } from 'express';
 import {Company} from '../company/company.model';
 import * as tokenManager from '../tokens/token.controller';
 
-import {sendResetPasswordEmail} from '../notifications/forgot-password.notifier';
-import {sendVerificationEmail} from '../notifications/email-verification.notifier';
+import {sendResetPasswordEmail} from '../notifications/notifiers/forgot-password.notifier';
+import {sendVerificationEmail} from '../notifications/notifiers/email-verification.notifier';
+
+const log = debug('api:users:controller');
 
 const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -66,6 +69,8 @@ export const updatePassword = (req, res) => {
 };
 
 export const isUsernameAvailable = (req: Request, res: Response) => {
+
+    log(`isUsernameAvailable : ${req.params.username}`);
 
     User.count({ email: req.params.username })
         .then((count) => {

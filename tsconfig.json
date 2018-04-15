@@ -1,13 +1,16 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
+    "module": "es6",
     "outDir": "dist"
   },
   "declaration": true,
   "declarationDir": "src/types/**/*.d.ts",
   "include": [
     "src/**/*.ts"
+  ],
+  "files": [
+    "node_modules/typescript/lib/lib.es6.d.ts"
   ],
   "exclude": [
     "node_modules"

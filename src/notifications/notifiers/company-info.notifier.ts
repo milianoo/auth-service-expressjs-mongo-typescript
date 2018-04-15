@@ -1,8 +1,9 @@
 import * as mandrill from 'mandrill-api/mandrill';
-import {ICompany} from '../company/company.interface';
-import {IUser} from '../users/user.interface';
+import {ICompany} from '../../company/company.interface';
+import {IUser} from '../../users/user.interface';
+import * as config from 'config';
 
-let mandrill_client = new mandrill.Mandrill('PNXkH2dFdBGpzDaRTKCsiw');
+let mandrill_client = new mandrill.Mandrill(config.get('mandrill_key'));
 
 export const sendCompanyInfoNotification = (email: string, fullName: string, company: ICompany, user: IUser) => {
 
