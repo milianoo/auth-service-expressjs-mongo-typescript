@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start:dev": "DEBUG=api:* NODE_ENV=development nodemon ./dist/bin/www",
-    "start:prod": "NODE_ENV=production node ./dist/bin/www",
+    "start:dev": "DEBUG=api:* NODE_ENV=development nodemon ./build/dist/bin/www",
+    "start": "NODE_ENV=production DEBUG=api:* node ./dist/bin/www",
     "test": "mocha --reporter spec --compilers ts:ts-node/register 'src/**/*.specs.ts'",
     "start-dev": "NODE_ENV=development DEBUG=authentication:server nodemon ./dist/bin/www",
     "build": "gulp scripts"
