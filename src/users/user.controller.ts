@@ -1,4 +1,6 @@
 
+const Json2csvParser = require('json2csv').Parser;
+
 import * as debug from 'debug';
 import {User} from "./user.model";
 import * as lodash from 'lodash';
@@ -86,7 +88,45 @@ export const getUsers = (req: Request, res: Response) => {
         .then((users) => {
             res.send(users);
         }).catch(err => {
-        res.send({ reason: 'BadRequest', message: 'failed to get the users.' });
+        res.status(400).send({ reason: 'BadRequest', message: 'failed to get the users.' });
+    });
+};
+
+export const exportCsv = (req: Request, res: Response) => {
+
+    User.find(req.query)
+        .then((users) => {
+
+            const fields = [
+                {
+                    label: 'Anrede',
+                    value: 'title'
+                },
+                {
+                    label: 'Vorname',
+                    value: 'firstName'
+                },
+                {
+                    label: 'Nachname',
+                    value: 'lastName'
+                },{
+                    label: 'Email',
+                    value: 'email'
+                },{
+                    label: 'EinwilligungDatenschutzUndErstinformation',
+                    value: (row, field) => row.termsAndConditions ? 'Ja' : 'Nein'
+                },
+                {
+                    label: 'Erstellt',
+                    value: (row, field) => row.createdAt.toLocaleString()
+                }
+            ];
+            const json2csvParser = new Json2csvParser({ fields });
+            const csv = json2csvParser.parse(users);
+
+            res.send(csv);
+        }).catch(err => {
+        res.status(400).send({ reason: 'BadRequest', message: 'failed to get the users.' });
     });
 };
 

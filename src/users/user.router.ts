@@ -1,7 +1,6 @@
 import * as express from 'express';
 import * as controller from './user.controller';
 import {isAuthenticated, authorize} from '../auth/auth.controller';
-import {Access} from './user.access';
 
 export class UserRouter {
 
@@ -28,6 +27,10 @@ export class UserRouter {
             .route('/users')
             .post(controller.createUser)
             .get(isAuthenticated, controller.getUsers);
+
+        this.router
+            .route('/users/export')
+            .get(isAuthenticated, controller.exportCsv);
 
         this.router
             .route('/users/:id')
