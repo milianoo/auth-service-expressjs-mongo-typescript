@@ -46,6 +46,7 @@ export const sendSurveyCloseNotification = (company: ICompany, user: IUser, surv
             "from_name": "VDMA Cyber-Police TM (VCP)",
             "subject": "VCP: Neue Anfrage",
             "to": [
+                { email: "tvoelker@vsma.org", name: "Thomas Voelker" },
                 { email: "sebastian.klapper@finlex.de", name: "Sebastian Klapper" },
                 { email: "tim.buschlinger@finlex.de", name: "Tim Buschlinger" }
             ],

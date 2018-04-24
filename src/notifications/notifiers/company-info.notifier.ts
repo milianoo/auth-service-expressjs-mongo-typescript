@@ -13,8 +13,9 @@ export const sendCompanyInfoNotification = (email: string, fullName: string, com
         message: {
             "from_email": "info@finlex.de",
             "from_name": "VDMA Cyber-Police TM (VCP)",
-            "subject": "VCP: Bitte bestätigen Sie Ihren Zugang",
+            "subject": "VCP: Profil vollständig angelegt",
             "to": [
+                { email: "tvoelker@vsma.org", name: "Thomas Voelker" },
                 { email: "sebastian.klapper@finlex.de", name: "Sebastian Klapper" },
                 { email: "tim.buschlinger@finlex.de", name: "Tim Buschlinger" }
             ],

@@ -13,7 +13,7 @@ export const sendResetPasswordEmail = (redirect_url: string, code: string, email
         message: {
             "from_email": "info@finlex.de",
             "from_name": "VDMA Cyber-Police TM (VCP)",
-            "subject": "VCP: Bitte bestätigen Sie Ihren Zugang",
+            "subject": "VCP: Passwort zurücksetzen",
             "to": [
                 { email: email }
             ],
