@@ -1,6 +1,6 @@
 {
   "name": "oauth-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "start:dev": "DEBUG=api:* NODE_ENV=development nodemon ./build/dist/bin/www",
