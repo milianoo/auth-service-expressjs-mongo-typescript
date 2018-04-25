@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import {Company, CompanyModel} from './company.model';
 import {sendCompanyInfoNotification} from '../notifications/notifiers/company-info.notifier';
 import {IUser} from '../users/user.interface';
+import * as csvUtil from '../utils/csv.utils';
 
 export const getCompany = (req: Request, res: Response, next: NextFunction) => {
 
@@ -20,6 +21,37 @@ export const getCompany = (req: Request, res: Response, next: NextFunction) => {
             }
         })
         .catch(err => res.send({ reason: 'BadRequest', message: 'failed to get the company.' }));
+};
+
+export const exportCsv = (req: Request, res: Response) => {
+
+    Company.find({ name: { $exists: true }})
+        .then((companies) => {
+
+            const fields = [
+                {
+                    label: 'Name',
+                    value: 'name'
+                },
+                {
+                    label: 'Webseite',
+                    value: 'website'
+                },{
+                    label: 'Address',
+                    value: (row, field) => row.address.street + ' ' + row.address.code + ' ' + row.address.city
+                },
+                {
+                    label: 'Umsatz',
+                    value: 'revenue'
+                }
+            ];
+
+            let csv = csvUtil.convertArrayToCsv(companies, fields);
+            res.send(csv);
+
+        }).catch(err => {
+        res.status(400).send({ reason: 'BadRequest', message: 'failed to get the companies.' });
+    });
 };
 
 export const getCompanies = (req: Request, res: Response) => {

@@ -1,5 +1,4 @@
-
-const Json2csvParser = require('json2csv').Parser;
+import * as csvUtil from '../utils/csv.utils';
 
 import * as debug from 'debug';
 import {User} from "./user.model";
@@ -121,10 +120,10 @@ export const exportCsv = (req: Request, res: Response) => {
                     value: (row, field) => row.createdAt.toLocaleString()
                 }
             ];
-            const json2csvParser = new Json2csvParser({ fields });
-            const csv = json2csvParser.parse(users);
 
+            let csv = csvUtil.convertArrayToCsv(users, fields);
             res.send(csv);
+
         }).catch(err => {
         res.status(400).send({ reason: 'BadRequest', message: 'failed to get the users.' });
     });

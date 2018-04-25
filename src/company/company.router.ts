@@ -15,6 +15,10 @@ export class CompanyRouter {
             .post(isAuthenticated, controller.createCompany);
 
         this.router
+            .route('/company/export')
+            .get(isAuthenticated, controller.exportCsv);
+
+        this.router
             .route('/company/:id')
             .get(isAuthenticated, controller.getCompany)
             .put(isAuthenticated, controller.updateCompany)
