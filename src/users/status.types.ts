@@ -1,5 +1,6 @@
 export enum UserStatus {
-    Pending_Verification = "PENDING_VERIFICATION",
-    Verified = "VERIFIED",
-    Disabled = "DISABLED"
+    Pending = 0,
+    Verified = 1,
+    Disabled = 2,
+    Suspended = 3
 }

@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as controller from './user.controller';
-import {isAuthenticated, authorize} from '../auth/auth.controller';
+import {auth} from '../auth/auth.middleware';
 
 export class UserRouter {
 
@@ -20,23 +20,23 @@ export class UserRouter {
         
         this.router
             .route('/users/activate')
-            .get(isAuthenticated, controller.resendEmail)
-            .post(isAuthenticated, controller.activateUser);
+            .get(auth.authenticate(), controller.resendEmail)
+            .post(auth.authenticate(), controller.activateUser);
 
         this.router
             .route('/users')
             .post(controller.createUser)
-            .get(isAuthenticated, controller.getUsers);
+            .get(auth.authenticate(), controller.getUsers);
 
         this.router
             .route('/users/export')
-            .get(isAuthenticated, controller.exportCsv);
+            .get(auth.authenticate(), controller.exportCsv);
 
         this.router
             .route('/users/:id')
-            .get(isAuthenticated, controller.getUser)
-            .put(isAuthenticated, controller.updateUser)
-            .delete(isAuthenticated, controller.deleteUser);
+            .get(auth.authenticate(), controller.getUser)
+            .put(auth.authenticate(), controller.updateUser)
+            .delete(auth.authenticate(), controller.deleteUser);
 
     }
 }

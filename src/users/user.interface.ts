@@ -3,21 +3,27 @@ import {UserStatus} from './status.types';
 
 export interface IUser extends Document {
 
-    status: UserStatus;
-
-    email?: string;
-
     title?: string;
 
     firstName?: string;
 
     lastName?: string;
 
-    companyId?: string;
+    email?: string;
+
+    username?: string;
+
+    company?: string;
+
+    creator?: string;
 
     password?: string;
 
-    readonly termsAndConditions?: boolean;
+    refreshToken?: string;
+
+    acceptedTerms?: boolean;
+
+    status: UserStatus;
 
     role?: number;
 
@@ -28,7 +34,7 @@ export interface IUserModel {
 
     name(): string;
 
-    comparePassword(password: string, hash: string, callback: Function): void;
+    comparePassword(password: string, hash: string): Promise<any>;
 
     findByEmail(email: string, callback: Function): void;
 }
