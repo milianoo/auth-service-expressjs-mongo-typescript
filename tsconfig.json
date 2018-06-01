@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "es6",
+    "target": "es5",
+    "module": "commonjs",
     "outDir": "dist"
   },
   "declaration": true,
   "declarationDir": "src/types/**/*.d.ts",
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "test/**/*.ts"
   ],
   "files": [
     "node_modules/typescript/lib/lib.es6.d.ts"
