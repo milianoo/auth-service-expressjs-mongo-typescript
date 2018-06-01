@@ -7,25 +7,29 @@ export const addRefreshToken = async (userId: string, token = null) => {
         token = randToken.uid(16);
     }
 
-    Redis.client.set(token, userId);
+    Redis.set(token, userId);
 };
 
-export const getTokenUserId = (token: string) => {
+export const getTokenUserId = (key: string) => {
 
     return new Promise((done) => {
-        Redis.client.get(token, function(err, data) {
-            if (err) done();
-            done(data);
-        });
+        Redis.get(key)
+            .then((data) => {
+                return data;
+            }).catch((err) => {
+                console.log(err);
+            });
     });
 };
 
 export const removeRefreshToken = (token: string) => {
 
     return new Promise((done) => {
-        Redis.client.del(token, function(err, data) {
-            if (err) done();
-            done(data);
-        });
+        Redis.delete(token)
+            .then((data) => {
+                return data;
+            }).catch((err) => {
+                console.log(err);
+            });
     });
 };

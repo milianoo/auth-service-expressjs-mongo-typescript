@@ -36,6 +36,15 @@ class RedisDatabase {
         });
     }
 
+    public delete(key: string) {
+        return new Promise((resolve, reject) => {
+            this.client.del(key, function(err, data) {
+                if (err) reject(err);
+                resolve(data);
+            });
+        });
+    }
+
     public connect() {
 
         let server = config.get('redis.server');
