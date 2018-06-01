@@ -1,10 +1,19 @@
 {
-  "mandrill_key": "PNXkH2dFdBGpzDaRTKCsiw",
-  "secret": "SecretForPassportJWT",
-  "mongodbPath": "mongodb://localhost:27017/",
-  "databaseName": "oauth",
+  "appName": "oauth-api",
+  "secret": "<% secret_key %>",
+  "database": {
+    "path": "mongodb://localhost:27017/",
+    "name": "oauth"
+  },
   "allowed_origins": [
-    "https://vsma.finlex.de",
-    "https://cyberpolice.vsma.de"
-  ]
+
+  ],
+  "redis": {
+    "enabled": "false",
+    "server": "127.0.0.1",
+    "port": "6379"
+  },
+  "jwtSession": {
+    "session": false
+  }
 }
