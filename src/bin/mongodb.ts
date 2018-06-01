@@ -9,7 +9,7 @@ class MongoDatabase {
     databaseUri: string;
 
     constructor() {
-        this.databaseUri = config.get('mongodbPath') + config.get('databaseName');
+        this.databaseUri = config.get('database.path') + config.get('database.name');
 
         mongoose.connection.on('connected', this.onConnected);
 
