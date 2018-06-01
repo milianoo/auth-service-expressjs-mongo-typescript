@@ -10,11 +10,6 @@ export class AuthRouter {
         this.router
             .route('/authenticate')
             .post(authController.authenticate);
-
-        this.router
-            .route('/authenticate/token')
-            .post(authController.refreshToken)
-            .delete(authController.revokeToken);
     }
 }
 

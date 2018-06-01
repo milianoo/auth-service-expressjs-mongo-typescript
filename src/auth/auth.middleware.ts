@@ -1,39 +1,69 @@
 import * as passportJwt from 'passport-jwt';
-import { User } from '../users/user.model';
 import * as config from 'config';
 import * as passport from 'passport';
-import {Roles} from '../users/roles/roles.config';
+
+import { ResponseErrorCode } from '../common/responseCodes.enum';
+import { ErrorResponse } from '../common/response.model';
+import { User } from '../users/user.model';
+import logger from '../logger';
 
 let JwtStrategy = passportJwt.Strategy;
 let ExtractJwt = passportJwt.ExtractJwt;
 
-export const AuthMiddleware = {
+const params = {
+    secretOrKey: config.get('secret'),
+    jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('jwt')
+};
 
-    setup(passport: passport.PassportStatic) {
+let strategy = new JwtStrategy(params, function(jwt_payload, done) {
 
-        let opts: any = {};
-        opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
-        opts.secretOrKey = config.get('secret');
+    let userId = jwt_payload._id;
 
-        passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+    // token is verified, proceed to check user
+    // TODO : it is possible to cache user at this point or read from payload, need to check it.
 
-            /*
-                TODO : Here should check against Redis
-                TODO : Admin should be able to disable a token
-            */
-            let userId = jwt_payload._id;
+    User.findOne({ _id: userId })
+        .then((user) => {
 
-            // checks if the issued token is still valid
-            User.findOne({ _id: userId })
-                .then((user) => {
+            if (user) {
+                done(null, user);
+            }
+        })
+        .catch((err) =>{
+            done(err, null);
+        });
+});
 
-                    if (user) {
-                        done(null, user);
-                    }
-                }).catch((err) =>{
-                    done(err, null);
-                });
-        }));
+passport.use(strategy);
+
+export const auth = {
+    initialize: function() {
+        return passport.initialize();
+    },
+    authenticate: function() {
+        return (req, res, next) => {
+
+            passport.authenticate("jwt", config.get('jwtSession'), (err, user, info) => {
+
+                if (err) {
+                    logger.error(err);
+                    return res
+                        .status(400)
+                        .send(new ErrorResponse(ResponseErrorCode.BadRequest, 'authentication failed.'));
+                }
+
+                if (!user) {
+                    logger.error('token verification failed.');
+                    logger.debug(info);
+                    return res
+                        .status(400)
+                        .send(new ErrorResponse(ResponseErrorCode.BadRequest, 'authentication failed.'));
+                }
+
+                next();
+
+            })(req, res, next);
+        };
     }
 };
 
