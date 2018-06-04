@@ -1,15 +1,20 @@
-import {Document} from "mongoose";
-import {UserStatus} from './status.types';
+import {Document} from 'mongoose';
+import {UserStatus} from './user.status.enum';
+import {UserType} from './user.type.enum';
 
 export interface IUser extends Document {
+
+    status: UserStatus;
+
+    type: UserType;
+
+    email: string;
 
     title?: string;
 
     firstName?: string;
 
     lastName?: string;
-
-    email?: string;
 
     username?: string;
 
@@ -23,11 +28,11 @@ export interface IUser extends Document {
 
     acceptedTerms?: boolean;
 
-    status: UserStatus;
-
     role?: number;
 
     permissions: Array<number>;
+
+    acceptedLegalTerms: boolean;
 }
 
 export interface IUserModel {
