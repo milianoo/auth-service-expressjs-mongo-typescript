@@ -37,7 +37,7 @@ server.on('listening', onListening);
  * Normalize a port into a number, string, or false.
  */
 
-function normalizePort(val) {
+function normalizePort(val: string) {
   let port = parseInt(val, 10);
 
   if (isNaN(port)) {
@@ -57,7 +57,7 @@ function normalizePort(val) {
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error) {
+function onError(error: any) {
   if (error.syscall !== 'listen') {
     log(error);
     throw error;
@@ -94,7 +94,7 @@ function onListening() {
     log('server started istening on ' + bind);
 
     let env = process.env.NODE_ENV || 'development';
-    if ('development' == env) {
+    if ('development' === env) {
         log('running mode : ' + process.env.NODE_ENV);
     }
 

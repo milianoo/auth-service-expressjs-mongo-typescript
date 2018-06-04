@@ -9,17 +9,18 @@ class RedisDatabase {
     private client;
 
     constructor() {
+        // empty-block
     }
 
     private onConnected() {
         log('Redis client connected to redis server.');
     }
 
-    private onError(err) {
+    private onError(err: any) {
         log('error occured on redis client', err);
     }
 
-    static enabled() {
+    public enabled() {
         return config.get('redis.enabled') === 'true';
     }
 
@@ -30,7 +31,9 @@ class RedisDatabase {
     public get(key: string) {
         return new Promise((resolve, reject) => {
             this.client.get(key, (err, reply) => {
-                if (err) reject(err);
+                if (err) {
+                    reject(err);
+                }
                 resolve(reply.toString());
             });
         });
@@ -38,8 +41,10 @@ class RedisDatabase {
 
     public delete(key: string) {
         return new Promise((resolve, reject) => {
-            this.client.del(key, function(err, data) {
-                if (err) reject(err);
+            this.client.del(key, function(err: any, data: any) {
+                if (err) {
+                    reject(err);
+                }
                 resolve(data);
             });
         });
@@ -53,7 +58,7 @@ class RedisDatabase {
         this.client = redis.createClient(port, server);
         this.client.on('connect', this.onConnected);
 
-        this.client.on("error", this.onError);
+        this.client.on('error', this.onError);
     }
 
 }

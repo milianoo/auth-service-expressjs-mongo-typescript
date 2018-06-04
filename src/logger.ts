@@ -17,7 +17,7 @@ const options: LoggerOptions = {
     console: {
         level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
         handleExceptions: true,
-        silent: process.argv.indexOf("--silent") >= 0,
+        silent: process.argv.indexOf('--silent') >= 0,
         json: false,
         colorize: true,
     },

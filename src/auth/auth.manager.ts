@@ -53,7 +53,7 @@ class AuthManagerClass {
 
             return null;
         }
-    };
+    }
 }
 
 export const AuthManager = new AuthManagerClass();

@@ -15,9 +15,9 @@ const params = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('jwt')
 };
 
-let strategy = new JwtStrategy(params, function(jwt_payload, done) {
+let strategy = new JwtStrategy(params, (jwtPayload, done) => {
 
-    let userId = jwt_payload._id;
+    let userId = jwtPayload._id;
 
     // token is verified, proceed to check user
     // TODO : it is possible to cache user at this point or read from payload, need to check it.
@@ -29,7 +29,7 @@ let strategy = new JwtStrategy(params, function(jwt_payload, done) {
                 done(null, user);
             }
         })
-        .catch((err) =>{
+        .catch((err) => {
             done(err, null);
         });
 });
@@ -43,7 +43,7 @@ export const auth = {
     authenticate: function() {
         return (req, res, next) => {
 
-            passport.authenticate("jwt", config.get('jwtSession'), (err, user, info) => {
+            passport.authenticate('jwt', config.get('jwtSession'), (err, user, info) => {
 
                 if (err) {
                     logger.error(err);

@@ -13,7 +13,7 @@ class MongoDatabase {
 
         mongoose.connection.on('connected', this.onConnected);
 
-        mongoose.connection.on('error',this.onError);
+        mongoose.connection.on('error', this.onError);
 
         mongoose.connection.on('disconnected', this.onDisconnected);
 
@@ -34,7 +34,7 @@ class MongoDatabase {
     private onConnected() {
         log(`Mongoose default connection open to ${this.databaseUri}`);
     }
-    private onError(err) {
+    private onError(err: any) {
         log('Mongoose default connection error: ' + err);
     }
     private onDisconnected() {

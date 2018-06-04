@@ -11,6 +11,7 @@ gulp.task('tslint', () =>
 
     gulp.src("./src/**/*.ts")
         .pipe(tslint({
+            typeCheck: true,
             formatter: 'prose'
         }))
         .pipe(tslint.report({
@@ -34,7 +35,7 @@ gulp.task('copy-files', [], () => {
         .pipe(gulp.dest('build'));
 });
 
-gulp.task('build', ['copy-files'], () => {
+gulp.task('build', ['copy-files', 'tslint'], () => {
 
     return gulp.src('src/**/*.ts')
         .pipe(ts())

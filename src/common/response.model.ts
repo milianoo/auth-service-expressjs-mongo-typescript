@@ -14,7 +14,7 @@ export class SuccessResponse extends ResponseClass {
         super();
 
         this.data = data;
-    };
+    }
 
 }
 
@@ -33,5 +33,5 @@ export class ErrorResponse extends ResponseClass {
             code: code,
             message: message
         };
-    };
+    }
 }

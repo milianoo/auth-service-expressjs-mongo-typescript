@@ -26,7 +26,7 @@ export const authenticate = async (req, res) => {
             .status(HttpStatus.OK)
             .send( new SuccessResponse(token) );
 
-    }else {
+    } else {
         logger.error(`user '${username}' failed to authenticate.`);
 
         return res

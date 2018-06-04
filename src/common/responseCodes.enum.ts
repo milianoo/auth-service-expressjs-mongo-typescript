@@ -1,5 +1,5 @@
 export enum ResponseErrorCode {
-    NotFound = "NotFound",
-    BadRequest = "BadRequest",
-    Unauthorized = "Unauthorized"
+    NotFound = 'NotFound',
+    BadRequest = 'BadRequest',
+    Unauthorized = 'Unauthorized'
 }
