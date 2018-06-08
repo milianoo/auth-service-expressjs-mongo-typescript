@@ -1,4 +1,5 @@
 import {Logger, transports, LoggerOptions} from 'winston';
+import 'winston-daily-rotate-file';
 import * as appRoot from 'app-root-path';
 import * as config from 'config';
 
@@ -7,12 +8,12 @@ const appName = config.get('appName');
 const options: LoggerOptions = {
     file: {
         level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-        filename: `${appRoot}/logs/${appName}.log`,
+        filename: `${appRoot}/logs/${appName}-%DATE%.log`,
+        datePattern: process.env.NODE_ENV === 'production' ? 'YYYY-MM-DD-HHmm' : 'YYYY-MM-DD',
         handleExceptions: true,
         json: true,
         maxsize: 5242880, // 5MB
-        maxFiles: 5,
-        colorize: true,
+        maxFiles: 5
     },
     console: {
         level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
@@ -26,8 +27,8 @@ const options: LoggerOptions = {
 
 const logger = new Logger({
     transports: [
-        new transports.File(options.file),
-        new transports.Console(options.console)
+        new transports.Console(options.console),
+        new (transports.DailyRotateFile)(options.file)
     ],
     exitOnError: false, // do not exit on handled exceptions
 });

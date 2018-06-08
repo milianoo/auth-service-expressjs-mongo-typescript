@@ -41,7 +41,8 @@
     "serve-favicon": "~2.4.5",
     "socket.io": "2.1.1",
     "split": "1.0.1",
-    "winston": "2.4.2"
+    "winston": "2.4.2",
+    "winston-daily-rotate-file": "3.2.1"
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.8",
