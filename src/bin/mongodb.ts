@@ -32,7 +32,7 @@ class MongoDatabase {
         mongoose.set('debug', true);
     }
     private onConnected() {
-        log(`Mongoose default connection open to ${this.databaseUri}`);
+        log(`Mongoose default connection open to '${config.get('database.name')}'`);
     }
     private onError(err: any) {
         log('Mongoose default connection error: ' + err);
