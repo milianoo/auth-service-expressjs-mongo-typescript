@@ -36,19 +36,25 @@ class App {
 
         // setup express app
         this.express = express();
-        this.middleware();
+        this.setupMiddleware();
         this.routes();
         this.setErrorHandlers();
         log(`express setup completed.`);
     }
 
-    // Configure Express middleware.
-    private middleware(): void {
+    // Configure Express middlewares.
+    private setupMiddleware(): void {
+        // takes care of http request headers
         this.express.use(helmet());
+        // prevents app to be loaded inside html frames
         this.express.use(frameguard({ action: 'deny' }));
+        // configure logging format
         this.express.use(morgan('combined'));
+        // express body parsers
         this.express.use(bodyParser.json());
         this.express.use(bodyParser.urlencoded({ extended: false }));
+
+        // takes care of CORS requests
         this.express.use(cors({
             origin: (origin, next) => {
                 if (!origin) { return next(null, true); }
@@ -60,6 +66,8 @@ class App {
                 return next(null, true);
             }
         }));
+
+        // initialize the auth middleware
         this.express.use(auth.initialize());
     }
 
@@ -76,13 +84,6 @@ class App {
         ];
 
         this.express.use('/api', enabledRoutes);
-
-        // to log the available paths
-        // enabledRoutes.forEach(router =>
-        //     router.stack.forEach(layer => {
-        //         console.log(
-        // `${layer.route.path}  \n\t ${layer.route.stack.map(l => l.name === 'authenticate' ? '(auth)' : `${l.method} | `).join(' ')} \n`);
-        //     }));
     }
 
     private setErrorHandlers(): void {
@@ -94,7 +95,6 @@ class App {
 
             logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 
-            // render the error page
             res.status(err.status || 500);
             res.status(404).send({ message: `unexpected error: ${err.message}`});
         });
