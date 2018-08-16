@@ -1,20 +1,16 @@
-import { Schema, Model, model} from 'mongoose';
+import { Model, model} from 'mongoose';
 
-import {IUser, IUserModel} from './user.interface';
-import {userSchemaModel} from './user.schema';
+import {IUserModel} from './user.interface';
 import {UserManager} from './user.manager';
 import logger from '../logger';
-
-export const UserSchema: Schema = new Schema(userSchemaModel, {
-    timestamps: true
-});
+import {UserSchema} from './user.schema';
 
 UserSchema.pre('save', async function (callback: Function) {
 
-    let user = <UserModel>this;
+    let user = this;
 
     try {
-        await UserManager.beforeSave(user);
+        await UserManager.onSave(user);
         callback();
 
     } catch (ex) {
@@ -26,6 +22,4 @@ UserSchema.pre('save', async function (callback: Function) {
 UserSchema.static('comparePassword', UserManager.verifyPassword);
 UserSchema.static('findByEmail', UserManager.getByEmail);
 
-export type UserModel = Model<IUser> & IUserModel & IUser;
-
-export const User = <UserModel>model<IUser>('User', UserSchema);
+export const User: Model<IUserModel> = model<IUserModel>('User', UserSchema);

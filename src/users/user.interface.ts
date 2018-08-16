@@ -2,7 +2,7 @@ import {Document} from 'mongoose';
 import {UserStatus} from './user.status.enum';
 import {UserType} from './user.type.enum';
 
-export interface IUser extends Document {
+interface IUser {
 
     status: UserStatus;
 
@@ -35,7 +35,7 @@ export interface IUser extends Document {
     acceptedLegalTerms: boolean;
 }
 
-export interface IUserModel {
+export interface IUserModel extends IUser, Document {
 
     name(): string;
 

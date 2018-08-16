@@ -1,11 +1,20 @@
-import {User, UserModel} from './user.model';
+import {User} from './user.model';
 import * as bcrypt from 'bcrypt-nodejs';
 import logger from '../logger';
-import {IUser} from './user.interface';
+import {IUserModel} from './user.interface';
 
-class UserManagerClass {
+interface IUserManager {
+    getById;
+    removeById;
+    getByEmail;
+    getByUsername;
+    isUsernameAvailable;
+    getAllUsers;
+}
 
-    public beforeSave(user: UserModel) {
+class UserManagerClass implements IUserManager {
+
+    public onSave(user: IUserModel) {
         return new Promise((done) => {
 
             // Break out if the password hasn't changed
@@ -43,19 +52,19 @@ class UserManagerClass {
         });
     }
 
-    public async getById(id: string): Promise<IUser> {
+    public async getById(id: string): Promise<IUserModel> {
         return await User.findById(id);
     }
 
-    public async removeById(id: string): Promise<IUser> {
+    public async removeById(id: string): Promise<IUserModel> {
         return await User.findByIdAndRemove(id);
     }
 
-    public async getByEmail(email: string): Promise<IUser> {
+    public async getByEmail(email: string): Promise<IUserModel> {
         return await User.findOne({ email: email });
     }
 
-    public async getByUsername(username: string): Promise<IUser> {
+    public async getByUsername(username: string): Promise<IUserModel> {
         return await User.findOne({ username: username });
     }
 
@@ -65,7 +74,7 @@ class UserManagerClass {
         return count === 0;
     }
 
-    public async getAllUsers( query: any): Promise<IUser[]> {
+    public async getAllUsers( query: any): Promise<IUserModel[]> {
         return await User.find(query);
     }
 }

@@ -1,9 +1,9 @@
-import {UserStatus} from './user.status.enum';
-import {UserType} from './user.type.enum';
+import {StatusTypes} from './user.status.enum';
+import {Schema, Types} from 'mongoose';
 
-export const userSchemaModel = {
+const userSchemaModel = {
     status: {
-        type: UserStatus,
+        type: StatusTypes,
         required: true
     },
     email: {
@@ -30,26 +30,16 @@ export const userSchemaModel = {
         type: String,
         required: true
     },
-    role: {
-        type: String,
-        required: true,
-        default: UserType.User
-    },
     company: {
-        type: String
-    },
-    acceptedLegalTerms: {
-        type: Boolean,
-        required: true
+        type: Types.ObjectId
     },
     password: {
         type: String,
         required: true,
         select: false
-    },
-    permissions: {
-        type: Array,
-        required: false,
-        default: []
     }
 };
+
+export const UserSchema: Schema = new Schema(userSchemaModel, {
+    timestamps: true
+});

@@ -2,8 +2,7 @@ import * as debug from 'debug';
 import * as lodash from 'lodash';
 
 import {User} from './user.model';
-import {UserType} from './user.type.enum';
-import {UserStatus} from './user.status.enum';
+import {StatusTypes} from './user.status.enum';
 import { Request, Response, NextFunction } from 'express';
 import {UserManager} from './user.manager';
 import * as HttpStatus from 'http-status-codes';
@@ -76,11 +75,17 @@ export const activateUser = async (req: Request, res: Response) => {
             .send(new ErrorResponse(ResponseErrorCode.BadRequest, 'field "username" is required.'));
     }
 
+    if (lodash.isNil(req.body.activation)) {
+        return res
+            .status(HttpStatus.BAD_REQUEST)
+            .send(new ErrorResponse(ResponseErrorCode.BadRequest, 'field "activation" is required.'));
+    }
+
     try {
         let user = await UserManager.getByUsername(req.params.username);
 
         if (user && user._id === req.body.activation) {
-            user.status = UserStatus.Verified;
+            user.status = StatusTypes.Verified;
             return res
                 .status(HttpStatus.OK)
                 .send(new SuccessResponse(user));
@@ -121,8 +126,7 @@ export const createUser = (req: Request, res: Response) => {
         user[ field ] = req.body.user[ field ];
     });
 
-    user.role = UserType.User;
-    user.status = UserStatus.Pending;
+    user.status = StatusTypes.Pending;
 
     user.validate()
         .then(() => {

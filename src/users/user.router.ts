@@ -14,13 +14,16 @@ export class UserRouter {
         //     .post(controller.passwordForgot)
         //     .put(controller.updatePassword);
         this.router
-            .route('/users/exist/:username')
+            .route('/users/name/:username/exist')
             .get(controller.isUsernameAvailable);
 
         this.router
-            .route('/users/activate')
-            // .get(auth.authenticate(), controller.resendEmail)
+            .route('/users/:username/activate')
             .post(auth.authenticate(), controller.activateUser);
+
+        this.router
+            .route('/users/:username/activate');
+        // .put(auth.authenticate(), controller.resendEmail)
 
         this.router
             .route('/users')
